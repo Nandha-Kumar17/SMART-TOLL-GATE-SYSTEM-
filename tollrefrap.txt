@@ -1,0 +1,812 @@
+include emu8086.inc 
+org 100h 
+ 
+.data  
+CAR_wheel dw 0
+busSS dw 0  
+our_var dw 0   
+total dw 0 
+LGVS DW 0  
+LGVS23 DW 0  
+LGVS4 DW 0
+count dw 0  
+pas dw 0 dup(?)
+msg1 db  'SMART TOLL PLAZA $'
+ms2 db '2 - MOTOR CYCLE $' 
+ms3 db '4 - MOTOR CAR $'
+ms4 db '5 - BUSES $'
+ms5 db '6 - LIGHT GOOD VEHICLES $' 
+ms6 db '7 - HEAVY GOOD VEHICLES WITH 2 OR 3 AXELS $'
+ms7 db '8 - HEAVY GOOD VEHICLES WITH 4 OR MORE AXELS $'
+ms8 db '9 - PASS $' 
+ms9 db '10 - AMBULANCE AND OTHER EMERGENCY VEHICLES $'
+ms10 db '11 - VIP AND OTHER GOVERNMENT IGHER OFFICIALS $'
+ms11 db '12 - FAST TAG $'
+ms12 db '1 - FASTTAG REGISTER$'
+fastag db 1
+fast dw 1000 
+bal0 dw 0
+bal1 dw 0
+bal2 dw 0
+bal3 dw 0
+bal4 dw 0
+bal5 dw 0
+ki dw 0 
+li dw 0
+TWOWHEELER:    
+                    MOV Ax,03H   
+                    INT 10H
+    
+                    PRINTN 'THE TOLL FARE IS FREE FOR 2-WHEELERS'
+                    INC [count]
+                    RET  
+                    
+MOTORCAR:   
+            MOV Ax,03H    
+            INT 10H
+            printn '1:1-WAY PASS'
+            printn '2:2-WAY PASS'                    
+            call scan_num
+            mov ax,cx
+            cmp AX,1
+                jz single
+            cmp ax,2
+                jz double
+            single:
+                    ADD [total],55  
+                    PRINTN ' THE FARE IS RS: 55/-'
+                    INC [count]
+                    add [CAR_wheel],55 
+                    cmp fastag,1
+                    je fast7
+                    RET
+            double:
+                   add [total],100
+                   printn ' THE FARE IS RS: 100/-'
+                   INC [count] 
+                    add [CAR_wheel],100  
+                    PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI 
+                    printn 'THE VEHICLE NUM IS::::'  
+                    MOV AX,PAS[DI-1]
+                    CALL PRINT_NUM
+                   RET
+                           
+                    
+BUS:        
+            MOV Ax,03H   
+            INT 10H  
+            printn '1:1-WAY PASS'
+            printn '2:2-WAY PASS'                    
+            call scan_num
+            mov ax,cx
+            cmp AX,1
+                jz singleS
+            cmp ax,2
+                jz doubleS
+            singleS:
+                    ADD [total],90  
+                    PRINTN ' THE FARE IS RS: 90/-'
+                    INC [count] 
+                    add [our_var],90 
+                    cmp fastag,1
+                    je fast7
+                    RET
+            doubleS:
+                   add [total],150
+                   printn ' THE FARE IS RS: 150/-'
+                   INC [count] 
+                   add [our_var],150 
+                   PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI
+                   RET 
+MOTORCAR1:   
+            MOV Ax,03H    
+            INT 10H 
+            ADD [total],55  
+            PRINTN ' THE FARE IS RS: 55/-'
+            INC [count]
+            add [CAR_wheel],55
+            MOV DX,55
+                 
+           printn  
+                    
+                    he:
+                        mov ax,[li]
+                        cmp ax,0
+                        jne he1 
+                        CMP BAL0,55
+                        jb fast7
+                        SUB BAL0,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL0
+                        call print_num     
+                        ret
+                    he1:
+                        mov ax,[li]
+                        cmp ax,1
+                        jne he2 
+                        CMP BAL1,55
+                        jb fast7
+                        SUB BAL1,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL1
+                        call print_num     
+                        ret 
+                   
+                    he2:
+                        mov ax,[li]
+                        cmp ax,2
+                        jne he3
+                        CMP BAL2,55
+                        jb fast7
+                        SUB BAL2,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL2
+                        call print_num     
+                        ret 
+                   he3:
+                        mov ax,[li]
+                        cmp ax,3
+                        jne he4 
+                        CMP BAL3,55
+                        jb fast7
+                        SUB BAL3,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL3
+                        call print_num     
+                        ret
+                   he4:
+                        mov ax,[li]
+                        cmp ax,4
+                        jne he5 
+                        CMP BAL4,55
+                        jb fast7
+                        SUB BAL4,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL4
+                        call print_num     
+                        ret      
+                   he5:
+                        mov ax,[li]
+                        cmp ax,5
+                        ;jne he1 
+                        CMP BAL5,55
+                        jb fast7
+                        SUB BAL5,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL5
+                        call print_num     
+                        ret 
+                  
+                        call scan_num
+                    RET
+                    
+                    fast7:
+                          printn 'YOUR  BALANCE TOO low YOU HAVE TO PAY TO CONTINUE FURTHER FASTTAG SERVICES!!!!'
+                          PRINTN ' YOU HAVE TO PAY TO CONTINUE OUR SERVICES OR ELSE LEAVE THE CAR AND WALK BY YOURSELF !! '
+                          printn 'ENTER YOUR AMOUNT TO BE ADDDED TO YOUR WALLET'
+                          CALL SCAN_NUM  
+                       to:
+                          cmp [li],0
+                          jne to1
+                          add bal0,cx
+                          sub bal0,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal0
+                          call print_num
+                          call scan_num
+                          RET
+                       to1: 
+                          cmp [li],1
+                          jne to2
+                          add bal1,cx
+                          sub bal1,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal1
+                          call print_num
+                          call scan_num
+                          RET
+                       to2:
+                          cmp [li],2
+                          jne to3
+                          add bal2,cx
+                          sub bal2,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal2
+                          call print_num
+                          call scan_num
+                          RET
+                       to3:
+                          cmp [li],3
+                          jne to4
+                          add bal3,cx
+                          sub bal3,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal3
+                          call print_num
+                          call scan_num
+                          RET
+                       to4:
+                          cmp [li],4
+                          jne to5
+                          add bal4,cx
+                          sub bal4,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal4
+                          call print_num
+                          call scan_num
+                          RET
+                       to5:
+                          cmp [li],5
+                          jne to5
+                          add bal5,cx
+                          sub bal5,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal5
+                          call print_num
+                          call scan_num
+                          RET
+                     ret     
+                          
+                          
+                                                            
+motorcar2:        
+                   MOV Ax,03H    
+                   INT 10H
+                   add [total],100
+                   printn ' THE FARE IS RS: 100/-'
+                   INC [count] 
+                   add [CAR_wheel],100 
+                    
+                    PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI 
+                    printn 'THE VEHICLE NUM IS::::'  
+                    MOV AX,PAS[DI-1]
+                    CALL PRINT_NUM 
+                    printn  
+                    
+                    hee:
+                        mov ax,[li]
+                        cmp ax,0
+                        jne hee1 
+                        CMP BAL0,55
+                        jb fast8
+                        SUB BAL0,100
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL0
+                        call print_num     
+                        ret
+                    hee1:
+                        mov ax,[li]
+                        cmp ax,1
+                        jne hee2 
+                        CMP BAL1,55
+                        jb fast8
+                        SUB BAL1,55
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL1
+                        call print_num     
+                        ret 
+                   
+                    hee2:
+                        mov ax,[li]
+                        cmp ax,2
+                        jne hee3
+                        CMP BAL2,55
+                        jb fast8
+                        SUB BAL2,100
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL2
+                        call print_num     
+                        ret 
+                   hee3:
+                        mov ax,[li]
+                        cmp ax,3
+                        jne hee4 
+                        CMP BAL3,55
+                        jb fast8
+                        SUB BAL3,100
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL3
+                        call print_num     
+                        ret
+                   hee4:
+                        mov ax,[li]
+                        cmp ax,4
+                        jne hee5 
+                        CMP BAL4,55
+                        jb fast8
+                        SUB BAL4,100
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL4
+                        call print_num     
+                        ret      
+                   hee5:
+                        mov ax,[li]
+                        cmp ax,5
+                        ;jne he1 
+                        CMP BAL5,55
+                        jb fast8
+                        SUB BAL5,100
+                        printn 'YOUR BALANCE IS:::'
+                        MOV ax,BAL5
+                        call print_num     
+                        ret 
+                   fast8:
+                          printn 'YOUR  BALANCE TOO low YOU HAVE TO PAY TO CONTINUE FURTHER FASTTAG SERVICES!!!!'
+                          PRINTN ' YOU HAVE TO PAY TO CONTINUE OUR SERVICES OR ELSE LEAVE THE CAR AND WALK BY YOURSELF !! '
+                          printn 'ENTER YOUR AMOUNT TO BE ADDDED TO YOUR WALLET'
+                          CALL SCAN_NUM  
+                       too:
+                          cmp [li],0
+                          jne too1
+                          add bal0,cx
+                          sub bal0,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal0
+                          call print_num
+                          call scan_num
+                          RET
+                       too1: 
+                          cmp [li],1
+                          jne too2
+                          add bal1,cx
+                          sub bal1,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal1
+                          call print_num
+                          call scan_num
+                          RET
+                       too2:
+                          cmp [li],2
+                          jne too3
+                          add bal2,cx
+                          sub bal2,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal2
+                          call print_num
+                          call scan_num
+                          RET
+                       too3:
+                          cmp [li],3
+                          jne too4
+                          add bal3,cx
+                          sub bal3,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal3
+                          call print_num
+                          call scan_num
+                          RET
+                       too4:
+                          cmp [li],4
+                          jne too5
+                          add bal4,cx
+                          sub bal4,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal4
+                          call print_num
+                          call scan_num
+                          RET
+                       too5:
+                          cmp [li],5
+                          jne too5
+                          add bal5,cx
+                          sub bal5,55
+                          printn 'YOUR AMOUNT IS DEDUCTED AND   YOUR BALANCE IS:::'
+                          MOV ax,bal5
+                          call print_num
+                          call scan_num
+                          RET                                  
+                
+                   
+LGV:        
+            MOV Ax,03H    
+            INT 10H
+            printn '1:1-WAY PASS'
+            printn '2:2-WAY PASS'                   
+            call scan_num
+            mov ax,cx
+            cmp AX,1
+                jz singleA
+            cmp ax,2
+                jz doubleA
+            singleA:
+                    ADD [total],120  
+                    PRINTN ' THE FARE IS RS: 120/-'
+                    INC [count]
+                    add [LGVS],120  
+                    cmp fastag,1
+                    je fast7
+                    RET
+            doubleA:
+                   add [total],200
+                   printn ' THE FARE IS RS: 200/-'
+                   INC [count] 
+                   add [LGVS],200 
+                   PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI
+                   RET                                       
+                        
+LGV23:      
+            MOV Ax,03H    
+            INT 10H
+           printn '1:1-WAY PASS'
+            printn '2:2-WAY PASS'                    
+            call scan_num
+            mov ax,cx
+            cmp AX,1
+                jz singleb
+            cmp ax,2
+                jz doubleb
+            singleb:
+                    ADD [total],150  
+                    PRINTN ' THE FARE IS RS: 150/-'
+                    INC [count] 
+                    add [LGVS23],150 
+                    cmp fastag,1
+                    je fast7
+                    RET
+            doubleb:
+                   add [total],250
+                   printn ' THE FARE IS RS: 250/-'
+                   INC [count]
+                   add [LGVS23],250   
+                   PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI
+                   RET 
+LGV4:      
+           MOV Ax,03H    
+           INT 10H
+           printn '1:1-WAY PASS'
+           printn '2:2-WAY PASS'                
+            call scan_num
+            mov ax,cx
+            cmp AX,1
+                jz singleC
+            cmp ax,2
+                jz doubleC
+            singleC:
+                    ADD [total],200  
+                    PRINTN ' THE FARE IS RS: 200/-'
+                    INC [count]
+                    add [LGVS4],200 
+                    cmp fastag,1
+                    je fast7
+                    RET
+            doubleC:
+                   add [total],350
+                   printn ' THE FARE IS RS: 350/-'
+                   INC [count]
+                   add [LGVS4],350  
+                   PRINTN 'ENTER THE VEHICLE NUMBER'
+                    CALL SCAN_NUM
+                    MOV PAS[DI],CX
+                    INC DI
+                   RET 
+                                     
+REGISTER:
+          MOV Ax,03H    
+          INT 10H
+          printn
+           
+          M1 DB 'REGISTER FOR FAST TAG$'
+          M2 DB 'ENTER YOUR VEHICLE NUMBER::::$'
+          M3 DB 'YOUR FASTTAG ID IS::::$'              
+          M4 DB 'ENTER THE MINIMUM BALANCE TO MAINTAIN $' 
+          M5 DB 'ADD YOUR MONEY TO YOUR PAYTM BALANCE $'
+         
+          mov dx, offset m1
+          call display
+          mov dx, offset m2
+          call display
+          call scan_num 
+          mov dx, offset m3
+          call display 
+          mov ax,[ki]        
+          call print_num
+          cmp [ki],0
+          jne ni 
+          printn '1000'
+           mov dx, offset m5
+          call display
+          call scan_num
+          mov bal0,cx
+          jmp po
+  ni:
+          cmp [ki],1
+          jne ni1    
+          printn '1001'
+          mov dx, offset m5
+          call display
+          call scan_num
+          mov bal1,cx  
+          jmp po
+  ni1:
+          cmp [ki],2
+          jne ni2    
+          printn '1002'
+          mov dx, offset m5
+          call display
+          call scan_num
+          mov bal2,cx
+          jmp po
+  ni2:
+          cmp [ki],3
+          
+          jne ni3    
+          printn '1003' 
+          mov dx, offset m5
+          call display
+          call scan_num
+          mov bal3,cx
+          jmp po
+  ni3:
+          cmp [ki],4
+          jne ni4    
+          printn '1004'
+          mov dx, offset m5
+          call display
+          call scan_num
+          mov bal4,cx
+          jmp po 
+  ni4:
+          cmp [ki],5
+          jne ni5    
+          printn '1005' 
+          mov dx, offset m5
+          call display
+          call scan_num
+          mov bal5,cx
+          jmp po    
+  ni5:
+          cmp [ki],6        
+          jne ni6    
+          printn '1006'
+          jmp po    
+  ni6:
+          cmp [ki],7
+          jne ni7    
+          printn '1007' 
+          jmp po   
+  ni7:
+          cmp [ki],8
+          jne ni8    
+          printn '1008'
+          jmp po    
+  ni8:
+          cmp [ki],9
+          printn '1009'
+          jmp po    
+  
+  po:
+          inc [ki]
+          jmp start
+          ret
+
+
+
+PASS: 
+         MOV Ax,03H    
+         INT 10H 
+         PRINTN 'ENTER THE VEHICLE NUMBER'
+         CALL SCAN_NUM
+           mov si,0 
+           mov ax,cx
+           MOV CX,DI
+           h: 
+             MOV DX,CX 
+             cmp ax,pas[si]  
+             je s
+             inc si   
+             MOV CX,DX
+             LOOP H
+             PRINTN 'YOUR VEHICLE IS NOT IDENTIFIED PLS PAY THE FEES'
+             JMP START          
+            s:
+             printN '::YOUR VEHICLE IS IDENTIFIED THE PASS IS VALID YOU CAN GO::'
+             mov pas[si],0
+             RET 
+             
+EMERGENCY:
+          MOV Ax,03H    
+          INT 10H 
+          PRINTN 'YOU CAN GOO!! AND SAVE THE LIFE!!'           
+          INC [count]             
+          ret
+VIP:
+          MOV Ax,03H    
+          INT 10H 
+          PRINTN 'SERVE THE COUNTRY !!!'           
+          INC [count]             
+          ret            
+FASTTAG:
+
+        
+        MOV Ax,03H    
+        INT 10H
+        CALL SCAN_NUM
+        MOV AX,CX
+        SUB AX,1000
+        mov [lI],AX
+        printn '1-WAY'
+        printn '2-WAY'
+        call scan_num
+        cmp cx,1
+        jne tt
+        call motorcar1
+        ret
+        tt:
+        call motorcar2                           
+        RET        
+
+.code 
+ 
+mov di,0 
+MOV SI,0
+START: 
+
+MOV AX,03H    
+INT 10H 
+mov dx, offset msg1
+call display
+mov dx, offset ms12
+call display
+
+
+mov dx,0 
+mov dx, offset ms2
+call display
+mov dx, offset ms3
+call display
+mov dx, offset ms4
+call display
+mov dx, offset ms5
+call display
+mov dx, offset ms6
+call display
+mov dx, offset ms7
+call display
+mov dx, offset ms8
+call display
+mov dx, offset mS9
+call display
+mov dx, offset ms10
+call display
+mov dx, offset ms11
+call display
+
+
+CALL SCAN_NUM   
+mov ax,0
+MOV AX,CX   
+CMP AX,2
+    jz two 
+cmp ax,4
+    jz four
+cmp ax,5
+    jz FIVE 
+cmp ax,6
+    jz SIX 
+CMP AX,7
+    JZ SEVEN          
+CMP AX,8
+    JZ EIGHT
+CMP AX,9
+    JZ NINE 
+CMP AX,10
+    JZ TEN
+CMP AX,11
+    JZ ELEVEN
+CMP AX,12
+    JZ TWELVE
+CMP AX,1
+    JZ ONE
+ONE:
+    CALL REGISTER
+    JMP Y                    
+two:
+    call TWOWHEELER
+    jmp y
+four:
+    call MOTORCAR
+    jmp y
+FIVE:
+    call BUS
+    jmp y
+SIX:
+    CALL LGV
+    JMP Y
+SEVEN:
+    CALL s
+    JMP Y    
+EIGHT:
+    CALL LGV4
+    JMP Y 
+NINE:
+    CALL PASS
+    JMP Y 
+TEN:
+    CALL EMERGENCY
+    JMP Y 
+ELEVEN:
+    CALL VIP
+    JMP Y 
+TWELVE:
+    CALL FASTTAG
+    JMP Y 
+                                                
+
+y: 
+MOV AX,03H    
+INT 10H
+PRINTN '::::::NEXT VEHICLE::::::' 
+PRINTN '1 - NXT VEHICLE'
+printn '2 - SUMMARY '
+PRINTN 'ANY NUM TO EXIT'
+CALL SCAN_NUM 
+MOV AX,CX
+CMP AX,1
+JZ START      
+
+ 
+cmp ax,2
+je summary
+hlt  
+summary:
+MOV AX,03H    
+INT 10H
+mov ax,[count]
+print 'TOTAL NUMBER OF VEHICLES PASSED::::'
+call print_num
+
+PRINTN
+printn 'TOTAL COLLECTION FOR CARS'
+MOV AX,[CAR_WHEEL]
+CALL PRINT_NUM  
+PRINTN
+printn 'TOTAL COLLECTION FOR BUSS'
+MOV AX,[OUR_VAR]
+CALL PRINT_NUM
+PRINTN
+printn 'TOTAL COLLECTION FOR LGV'
+MOV AX,[LGVS]
+CALL PRINT_NUM 
+PRINTN
+printn 'TOTAL COLLECTION FOR LGV 2 OR 3 AXELS'
+MOV AX,[LGVS23]
+CALL PRINT_NUM
+printn 
+printn 'TOTAL COLLECTION FOR LGV 4 OR MORE'
+MOV AX,[LGVS4]
+CALL PRINT_NUM  
+PRINTN
+printn 'TOTAL COLLECTION '
+MOV AX,[TOTAL]
+CALL PRINT_NUM
+PRINTN  
+hlt
+              
+
+DEFINE_PRINT_NUM
+DEFINE_SCAN_NUM
+DEFINE_PRINT_NUM_UNS
+
+display:
+printn
+mov ah,9
+int 21h
+ret
+
+                    
+                    
